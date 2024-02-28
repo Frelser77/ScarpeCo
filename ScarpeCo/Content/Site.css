@@ -1,0 +1,89 @@
+﻿/* Set padding to keep content from hitting the edges */
+.body-content {
+    margin-top: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+img{
+    cursor: pointer;
+}
+
+    img.edit {
+        cursor: pointer;
+        max-height: 200px;
+        max-width: 90px;
+    }
+
+.default {
+    max-height: 300px;
+    max-width: 230px;
+    margin-inline: auto;
+    transition:transform 0.3s;
+ }
+
+.default:hover{
+    transform: scale(1.1);
+}
+
+.small-images img {
+    width: 50px;
+    height: auto;
+    margin-right: 5px;
+}
+
+.small-images img:hover {
+    box-shadow:inset 0 0 5px 1px #efefef;
+    transform: scale(1.05);
+}
+
+.checkpst {
+    top: 10px;
+    right: 10px;
+}
+
+.hover-section {
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    top: 35%;
+    left: 30%;
+    background: rgba(255, 255, 255, 0.9);
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.card:hover .hover-section {
+    opacity: 1; 
+    visibility: visible;
+}
+
+/* Stile per la pagina Details */
+.detail-hover-section {
+    width: 115px;
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    left: 5%;
+    bottom: -5%;
+    background: rgba(255, 255, 255, 0.9);
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.detail-card:hover .detail-hover-section {
+    opacity: 1;
+    visibility: visible;
+}
