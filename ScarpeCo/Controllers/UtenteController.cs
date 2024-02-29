@@ -1,96 +1,16 @@
-﻿using ScarpeCo.Models;
-using System.Collections.Generic;
+﻿using ScarpeCo.Filters;
+using ScarpeCo.Models;
+using System;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Web.Mvc;
 
 namespace ScarpeCo.Controllers
 {
+    [AdminLayoutSelector]
     public class UtenteController : Controller
     {
-        // GET: Utente
-        public ActionResult Index()
-        {
-            if (Session["IsAdmin"] != null && (bool)Session["IsAdmin"])
-            {
-                List<Utente> utenti = GetAllUtenti();
-                return View(utenti);
-            }
-            return RedirectToAction("Login");
-        }
-
-        private List<Utente> GetAllUtenti()
-        {
-            List<Utente> utenti = new List<Utente>();
-            string connectionString = ConfigurationManager.ConnectionStrings["ScarpeCo"].ConnectionString;
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                string query = "SELECT * FROM Utenti";
-
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    conn.Open();
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            Utente utente = new Utente
-                            {
-                                Id = (int)reader["Id"],
-                                Nome = reader["Nome"].ToString(),
-                                Cognome = reader["Cognome"].ToString(),
-                                Eta = (int)reader["Eta"],
-                                Email = reader["Email"].ToString(),
-                                Username = reader["Username"].ToString(),
-                                Admin = (bool)reader["Admin"]
-                            };
-                            utenti.Add(utente);
-                        }
-                    }
-                }
-            }
-            return utenti;
-        }
-
-        // GET: Utente/Details/5
-        public ActionResult Details(int id)
-        {
-            string connectionString = ConfigurationManager.ConnectionStrings["ScarpeCo"].ConnectionString;
-            Utente utente = null;
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                string query = "SELECT * FROM Utenti WHERE Id = @Id";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@Id", id);
-                    conn.Open();
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            utente = new Utente
-                            {
-                                Id = (int)reader["Id"],
-                                Nome = reader["Nome"].ToString(),
-                                Cognome = reader["Cognome"].ToString(),
-                                Eta = (int)reader["Eta"],
-                                Email = reader["Email"].ToString(),
-                                Username = reader["Username"].ToString(),
-                                Admin = (bool)reader["Admin"]
-                            };
-                        }
-                    }
-                }
-            }
-
-            if (utente == null)
-            {
-                return HttpNotFound();
-            }
-            return View(utente);
-        }
-
+        private readonly Utente articoloModel = new Utente();
 
         // GET: Utente/Registrazione
         // Mostra il form di registrazione
@@ -129,11 +49,14 @@ namespace ScarpeCo.Controllers
                         cmd.ExecuteNonQuery();
                     }
                 }
-
+                TempData["SuccessMessage"] = "Registrazione completata con successo. Ora puoi effettuare il login.";
                 return RedirectToAction("Login");
             }
-
-            return View(utente);
+            else
+            {
+                TempData["ErrorMessage"] = "Errore durante la registrazione. Per favore, riprova.";
+                return View(utente);
+            }
         }
 
         // GET: Utente/Login
@@ -143,7 +66,7 @@ namespace ScarpeCo.Controllers
             // Verifica se l'utente è già loggato e, in caso affermativo, reindirizzalo
             if (Session["UserId"] != null)
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Articoli");
             }
             return View();
         }
@@ -152,38 +75,59 @@ namespace ScarpeCo.Controllers
         // Processa le credenziali di login inviate dall'utente
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Login(string Username, string Password)
+        public ActionResult Login(LoginModel model)
         {
-            string connectionString = ConfigurationManager.ConnectionStrings["ScarpeCo"].ConnectionString;
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            if (ModelState.IsValid)
             {
-                string query = "SELECT * FROM Utenti WHERE Username = @Username AND Password = @Password";
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@Username", Username);
-                cmd.Parameters.AddWithValue("@Password", Password);
-
-                conn.Open();
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                string connectionString = ConfigurationManager.ConnectionStrings["ScarpeCo"].ConnectionString;
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
-                    if (reader.Read())
+                    // Prima controlla se l'username esiste
+                    string queryUserExists = "SELECT COUNT(*) FROM Utenti WHERE Username = @Username";
+                    SqlCommand cmdUserExists = new SqlCommand(queryUserExists, conn);
+                    cmdUserExists.Parameters.AddWithValue("@Username", model.Username);
+
+                    conn.Open();
+                    int userExists = (int)cmdUserExists.ExecuteScalar();
+
+                    if (userExists > 0)
                     {
-                        // Imposta l'utente come loggato
-                        Session["UserId"] = reader["Id"].ToString();
-                        Session["IsAdmin"] = reader["Admin"];
-                        if ((bool)Session["IsAdmin"])
+                        // Se l'username esiste, controlla se la password è corretta
+                        string queryPasswordCorrect = "SELECT * FROM Utenti WHERE Username = @Username AND Password = @Password";
+                        SqlCommand cmdPasswordCorrect = new SqlCommand(queryPasswordCorrect, conn);
+                        cmdPasswordCorrect.Parameters.AddWithValue("@Username", model.Username);
+                        cmdPasswordCorrect.Parameters.AddWithValue("@Password", model.Password);
+
+                        using (SqlDataReader reader = cmdPasswordCorrect.ExecuteReader())
                         {
-                            return RedirectToAction("Index", "Utente");
+                            if (reader.Read())
+                            {
+                                Session["UserId"] = reader["Id"].ToString();
+                                Session["IsAdmin"] = reader["Admin"];
+                                bool isAdmin = Convert.ToBoolean(reader["Admin"]);
+                                return isAdmin ? RedirectToAction("All", "Admin") : RedirectToAction("Index", "Articoli");
+                            }
+                            else
+                            {
+                                // Username esiste ma la password è sbagliata
+                                ModelState.AddModelError("", "La password inserita è sbagliata.");
+                                return View(model);
+                            }
                         }
-                        return RedirectToAction("Index", "Articoli");
+                    }
+                    else
+                    {
+                        // Username non esiste
+                        ModelState.AddModelError("", "L'username inserito non esiste.");
+                        return View(model);
                     }
                 }
             }
-
-            // Se le credenziali non sono valide, mostra un messaggio di errore
-            ViewBag.ErrorMessage = "Username o password non validi.";
-            return View();
+            // Se arrivi qui, qualcosa è fallito, ri-mostra il form
+            return View(model);
         }
+
+
 
         // GET: Utente/Logout
         // Effettua il logout dell'utente
@@ -194,92 +138,6 @@ namespace ScarpeCo.Controllers
             return RedirectToAction("Login", "Utente");
         }
 
-        // GET: Utente/Edit/5
-        // Mostra il form per la modifica di un utente
-        public ActionResult Edit(int id)
-        {
-            string connectionString = ConfigurationManager.ConnectionStrings["ScarpeCo"].ConnectionString;
-            Utente utente = null;
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                string query = "SELECT * FROM Utenti WHERE Id = @Id";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@Id", id);
-                    conn.Open();
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            utente = new Utente
-                            {
-                                Id = (int)reader["Id"],
-                                Nome = reader["Nome"].ToString(),
-                                Cognome = reader["Cognome"].ToString(),
-                                Eta = (int)reader["Eta"],
-                                Email = reader["Email"].ToString(),
-                                Username = reader["Username"].ToString(),
-                                Password = reader["Password"].ToString(),
-                                Admin = (bool)reader["Admin"]
-                            };
-                        }
-                    }
-                }
-            }
-            if (utente == null)
-            {
-                return HttpNotFound();
-            }
-            return View(utente);
-        }
 
-        // POST: Utente/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(Utente utente)
-        {
-            if (ModelState.IsValid)
-            {
-                string connectionString = ConfigurationManager.ConnectionStrings["ScarpeCo"].ConnectionString;
-                using (SqlConnection conn = new SqlConnection(connectionString))
-                {
-                    string query = "UPDATE Utenti SET Nome = @Nome, Cognome = @Cognome, Eta = @Eta, Email = @Email, Username = @Username, Password = @Password, Admin = @Admin WHERE Id = @Id";
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@Id", utente.Id);
-                        cmd.Parameters.AddWithValue("@Nome", utente.Nome);
-                        cmd.Parameters.AddWithValue("@Cognome", utente.Cognome);
-                        cmd.Parameters.AddWithValue("@Eta", utente.Eta);
-                        cmd.Parameters.AddWithValue("@Email", utente.Email);
-                        cmd.Parameters.AddWithValue("@Username", utente.Username);
-                        cmd.Parameters.AddWithValue("@Password", utente.Password);
-                        cmd.Parameters.AddWithValue("@Admin", utente.Admin);
-
-                        conn.Open();
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-                return RedirectToAction("Index");
-            }
-            return View(utente);
-        }
-
-        // GET: Utente/Delete/5
-        // Mostra il form di conferma eliminazione
-        public ActionResult Delete(int id)
-        {
-            string connectionString = ConfigurationManager.ConnectionStrings["ScarpeCo"].ConnectionString;
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                string query = "DELETE FROM Utenti WHERE Id = @Id";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@Id", id);
-                    conn.Open();
-                    cmd.ExecuteNonQuery();
-                }
-            }
-            return RedirectToAction("Index");
-        }
     }
 }

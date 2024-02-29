@@ -1,10 +1,10 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="it-IT">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - Applicazione ASP.NET</title>
+    <title>@ViewBag.Title - ScarpeCo</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
 </head>
@@ -23,14 +23,16 @@
                     <li>@Html.ActionLink("Contatto", "Contact", "Home", new { area = "" }, new { @class = "nav-link" })</li>
                     <li>@Html.ActionLink("Articoli", "Index", "Articoli", new { area = "" }, new { @class = "nav-link" })</li>
 
+                  
+
                     @if (Session["UserId"] != null)
                     {
-                        <li>@Html.ActionLink("Logout", "Logout", "Utente",null,new { @class="nav-link"})</li>
+                        <li>@Html.ActionLink("Logout", "Logout", "Utente", null, new { @class = "nav-link ms-auto" })</li>
                     }
                     else
                     {
-                        <li>@Html.ActionLink("Login", "Login", "Utente",null, new {@class="nav-link"})</li>
-                        <li>@Html.ActionLink("Registrazione", "Registrazione", "Utente",null, new { @class = "nav-link" })</li>
+                        <li>@Html.ActionLink("Login", "Login", "Utente", null, new { @class = "nav-link" })</li>
+                        <li>@Html.ActionLink("Registrazione", "Registrazione", "Utente", null, new { @class = "nav-link ms-auto" })</li>
                     }
 
                 </ul>
@@ -39,7 +41,6 @@
     </nav>
     <div class="container body-content">
         @RenderBody()
-        <hr />
         <footer>
             <p>&copy; @DateTime.Now.Year - Applicazione ASP.NET</p>
         </footer>
@@ -47,6 +48,7 @@
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/jqueryval")
     @RenderSection("scripts", required: false)
 </body>
 </html>

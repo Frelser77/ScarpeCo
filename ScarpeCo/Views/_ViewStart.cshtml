@@ -1,3 +1,7 @@
 ﻿@{
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    // Verifica se esiste un valore di sessione che indica se l'utente è admin
+    bool isAdmin = HttpContext.Current.Session["IsAdmin"] != null && (bool)HttpContext.Current.Session["IsAdmin"];
+
+    // Imposta il layout in base al valore della sessione
+    Layout = isAdmin ? "~/Views/Shared/_AdminLayout.cshtml" : "~/Views/Shared/_Layout.cshtml";
 }

@@ -36,5 +36,6 @@ namespace ScarpeCo.Models
 
         [Required]
         public bool Admin { get; set; }
+
     }
 }

@@ -120,13 +120,16 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\ArticoliController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\UtenteController.cs" />
+    <Compile Include="Filters\AdminLayoutSelectorAttribute.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Articolo.cs" />
+    <Compile Include="Models\Admin.cs" />
     <Compile Include="Models\LoginModel.cs" />
     <Compile Include="Models\Utente.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -271,15 +274,16 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Articoli\Index.cshtml" />
     <Content Include="Views\Articoli\Details.cshtml" />
-    <Content Include="Views\Articoli\Create.cshtml" />
-    <Content Include="Views\Articoli\Edit.cshtml" />
-    <Content Include="Views\Articoli\All.cshtml" />
-    <Content Include="Views\Utente\Index.cshtml" />
     <Content Include="Views\Utente\Registrazione.cshtml" />
     <Content Include="Views\Utente\Login.cshtml" />
-    <Content Include="Views\Utente\Edit.cshtml" />
-    <Content Include="Views\Utente\Delete.cshtml" />
     <Content Include="Views\Utente\Details.cshtml" />
+    <Content Include="Views\Admin\Index.cshtml" />
+    <Content Include="Views\Admin\Details.cshtml" />
+    <Content Include="Views\Admin\Edit.cshtml" />
+    <Content Include="Views\Admin\All.cshtml" />
+    <Content Include="Views\Admin\ArticoloCreate.cshtml" />
+    <Content Include="Views\Admin\ArticoloEdit.cshtml" />
+    <Content Include="Views\Shared\_AdminLayout.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

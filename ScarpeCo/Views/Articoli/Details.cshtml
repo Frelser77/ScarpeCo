@@ -18,9 +18,10 @@
                         <div class="btn-group">
                             @if (Session["UserId"] != null && (bool)Session["IsAdmin"])
                             {
-                                @Html.ActionLink("Edit", "Edit", new { id = Model.Id }, new { @class = "btn btn-primary" })
+                                @Html.ActionLink("Edit", "ArticoloEdit", "Admin", new { id = Model.Id }, new { @class = "btn btn-dark" })
+
                             }
-                            @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-secondary ms-2" })
+                            @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-secondary" })
                         </div>
                     </div>
                 </div>

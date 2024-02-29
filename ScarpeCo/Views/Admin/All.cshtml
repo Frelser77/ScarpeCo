@@ -1,0 +1,119 @@
+﻿@model IEnumerable<ScarpeCo.Models.Articolo>
+<p>
+    @Html.ActionLink("Create New", "ArticoloCreate")
+</p>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Nome)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Prezzo)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Descrizione)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ImmagineCopertinaUrl)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ImmagineAggiuntiva1Url)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ImmagineAggiuntiva2Url)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.InVetrina)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nome)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Prezzo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Descrizione)
+            </td>
+            <td>
+                <img class="card-img-top" src="@Url.Content(item.ImmagineCopertinaUrl)" alt="Immagine dell'articolo bianca">
+            </td>
+            <td>
+                <img class="card-img-top" src="@Url.Content(item.ImmagineAggiuntiva1Url)" alt="Immagine dell'articolo nera">
+            </td>
+            <td>
+                <img class="card-img-top" src="@Url.Content(item.ImmagineAggiuntiva2Url)" alt="Immagine dell'articolo rosa">
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.InVetrina)
+            </td>
+            <td>
+                <div class="btn-group d-flex flex-column align-items-center justify-content-center">
+                    @Html.ActionLink("Edit", "ArticoloEdit", "Admin", new { id = item.Id }, null)
+                    @Html.ActionLink("Details", "Details", "Articoli", new { id = item.Id }, null)
+                    @using (Html.BeginForm("ToggleInVetrina", "Admin", new { id = item.Id }, FormMethod.Post, new { @class = "form-inline" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Visible</button>
+                    }
+                </div>
+
+                @Html.ActionLink("Clone", "Clone", new { id = item.Id }, new { @class = "btn btn-sm btn-warning" })
+
+                @using (Html.BeginForm("DeleteArticolo", "Admin", new { id = item.Id }, FormMethod.Post, new { @onsubmit = "return confirm('Sei sicuro di voler eliminare questo articolo?');" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Elimina</button>
+                }
+
+            </td>
+        </tr>
+    }
+
+</table>
+
+@section Scripts {
+
+    <script>
+        // Attendi che il documento sia completamente caricato
+        document.addEventListener("DOMContentLoaded", function () {
+            // Cerca gli elementi con le classi 'alert-success' e 'alert-danger'
+            var successMessage = document.querySelector(".alert-success");
+            var errorMessage = document.querySelector(".alert-danger");
+
+            // Se l'elemento esiste, impostare un timeout per nasconderlo dopo 5 secondi (5000 millisecondi)
+            if (successMessage) {
+                setTimeout(function () {
+                    successMessage.style.display = 'none';
+                }, 5000);
+            }
+
+            if (errorMessage) {
+                setTimeout(function () {
+                    errorMessage.style.display = 'none';
+                }, 5000);
+            }
+        });
+    </script>
+}
